@@ -9,13 +9,11 @@ package piper74.legacy.vanillafix.util;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.render.TextRenderer;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.OptionButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.util.crash.CrashReport;
-import org.spongepowered.asm.mixin.Unique;
 
 import java.io.IOException;
 
@@ -33,17 +31,17 @@ public class GuiInitErrorScreen extends GuiProblemScreen{
     private int CrashReportName_Height = 0;
 
     private TextRenderer getFontRenderer() {
-        return this.client.textRenderer;
+        return this.minecraft.textRenderer;
     }
 
     @Override
     public void init() {
         //mc.setIngameNotInFocus();
-        client.focused = false;
+        minecraft.focused = false;
         super.init();
 
         if (report != null) {
-            CrashReportNameWidth = this.textRenderer.getStringWidth(report.getFile().getName());
+            CrashReportNameWidth = this.textRenderer.getWidth(report.getFile().getName());
             CrashReportNameWidth2 = (this.width / 2) - (CrashReportNameWidth / 2);
         }
 

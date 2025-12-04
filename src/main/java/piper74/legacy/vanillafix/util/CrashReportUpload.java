@@ -18,8 +18,6 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
 
 public class CrashReportUpload {
@@ -39,23 +37,11 @@ public class CrashReportUpload {
     private static class GistPost {
         @SerializedName("public")
         public boolean isPublic;
-        public Map<String, GistFile> files;
 
-        public GistPost(boolean isPublic, Map<String, GistFile> files) {
+        public GistPost(boolean isPublic) {
             this.isPublic = isPublic;
-            this.files = files;
         }
     }
-
-    private static class GistFile {
-        public String content;
-
-        public GistFile(String content) {
-            this.content = content;
-        }
-    }
-
-
 
     public static String uploadToGithubGists(String crashReport) throws IOException {
         /**
@@ -67,9 +53,7 @@ public class CrashReportUpload {
             String fileName = "mccrash.txt";
             post.addHeader("Authorization", "token " + uploadKey);
 
-            GistPost body = new GistPost(false, new HashMap<String, GistFile>() {{
-                put(fileName, new GistFile(crashReport));
-            }});
+            GistPost body = new GistPost(false);
             post.setEntity(createStringEntity(new Gson().toJson(body)));
 
 

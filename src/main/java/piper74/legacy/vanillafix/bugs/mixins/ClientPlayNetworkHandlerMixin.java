@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.network.handler.ClientPlayNetworkHandler;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -20,12 +20,12 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 @Mixin(ClientPlayNetworkHandler.class)
 public class ClientPlayNetworkHandlerMixin {
-	@ModifyArg(method = "onGameJoin", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;openScreen(Lnet/minecraft/client/gui/screen/Screen;)V"))
+	@ModifyArg(method = "handleLogin", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;openScreen(Lnet/minecraft/client/gui/screen/Screen;)V"))
 	private Screen onGuiDisplayJoin(Screen original) {
 		return null;
 	}
 
-	@ModifyArg(method = "onPlayerRespawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;openScreen(Lnet/minecraft/client/gui/screen/Screen;)V", ordinal = 0))
+	@ModifyArg(method = "handlePlayerRespawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;openScreen(Lnet/minecraft/client/gui/screen/Screen;)V", ordinal = 0))
 	private Screen onGuiDisplayRespawn(Screen original) {
 		return null;
 	}

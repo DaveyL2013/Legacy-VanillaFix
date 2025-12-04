@@ -6,7 +6,7 @@
 
 package piper74.legacy.vanillafix.util;
 
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.crash.CrashReport;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,7 +28,7 @@ public class CrashUtils {
 	
 	static {
         try {
-            isClient = MinecraftClient.getInstance() != null;
+            isClient = Minecraft.getInstance() != null;
         } catch (NoClassDefFoundError e) {
             isClient = false;
         }
@@ -43,7 +43,7 @@ public class CrashUtils {
             if (report.getFile() == null) {
                 String reportName = "crash-";
                 reportName += new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date());
-                reportName += isClient && MinecraftClient.getInstance().isOnThread() ? "-client" : "-server";
+                reportName += isClient && Minecraft.getInstance().isOnSameThread() ? "-client" : "-server";
                 reportName += ".txt";
 
                 File reportsDir = isClient ? new File(FabricLoader.getInstance().getGameDirectory(), "crash-reports") : new File("crash-reports");
@@ -56,7 +56,7 @@ public class CrashUtils {
         }
 
         LOGGER.fatal("Minecraft ran into a problem! " + (report.getFile() != null ? "Report saved to: " + report.getFile() : "Crash report could not be saved.")
-                + "\n" + report.asString());
+                + "\n" + report.toString());
     }
 
 // This code is from

@@ -8,11 +8,9 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 //import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.resource.language.I18n;
 import org.lwjgl.input.Keyboard;
-import piper74.legacy.vanillafix.config.LegacyVanillaFixConfig;
-import piper74.legacy.vanillafix.LegacyVanillaFix;
 import java.io.IOException;
 import piper74.legacy.vanillafix.util.ScreenUtil;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 public class ConfigScreen extends Screen {
     private final Screen parent;
@@ -39,7 +37,7 @@ public class ConfigScreen extends Screen {
 		this.buttons.add(new ButtonWidget(206, this.width-85,y,50,20, ScreenUtil.checkString(config.betterCrashes)) {
 			
 			@Override
-			public void render(MinecraftClient client, int mouseX, int mouseY) {
+			public void render(Minecraft client, int mouseX, int mouseY) {
 				visible = true;
 				active = true;
 				//if (selected != null) {
@@ -51,7 +49,7 @@ public class ConfigScreen extends Screen {
 		y += 30;
 		this.buttons.add(new ButtonWidget(205, this.width-85,y,50,20, ScreenUtil.checkString(config.fasterDimensionChange)) {
 					@Override
-			public void render(MinecraftClient client, int mouseX, int mouseY) {
+			public void render(Minecraft client, int mouseX, int mouseY) {
 				visible = true;
 				active = true;
 					message = (ScreenUtil.checkString(config.fasterDimensionChange));
@@ -61,7 +59,7 @@ public class ConfigScreen extends Screen {
 		y += 30;
 		this.buttons.add(new ButtonWidget(203, this.width-85,y,50,20, ScreenUtil.checkString(config.allowGUIsInNetherPortals)) {
 			@Override
-			public void render(MinecraftClient client, int mouseX, int mouseY) {
+			public void render(Minecraft client, int mouseX, int mouseY) {
 				visible = true;
 				active = true;
 					message = (ScreenUtil.checkString(config.allowGUIsInNetherPortals));
@@ -71,7 +69,7 @@ public class ConfigScreen extends Screen {
 		y += 30;
 		this.buttons.add(new ButtonWidget(204, this.width-85,y,50,20, ScreenUtil.checkString(config.disableInitialChunkLoad)) {
 			@Override
-			public void render(MinecraftClient client, int mouseX, int mouseY) {
+			public void render(Minecraft client, int mouseX, int mouseY) {
 				visible = true;
 				active = true;
 					message = (ScreenUtil.checkString(config.disableInitialChunkLoad));
@@ -89,10 +87,10 @@ public class ConfigScreen extends Screen {
 
         switch (button.id) {
             case 1:
-                this.client.openScreen(this.parent);
+                this.minecraft.openScreen(this.parent);
                 break;
             case 2:
-                this.client.openScreen(this.parent);
+                this.minecraft.openScreen(this.parent);
 				try {
                 LegacyVanillaFixConfig.save( config );
 				} catch (IOException e) {
@@ -146,7 +144,7 @@ public class ConfigScreen extends Screen {
         super.render(mouseX, mouseY, tickDelta);
 		
 		int y = 40;
-		drawWithShadow(this.textRenderer, I18n.translate("legacy.vanillafix.config.betterCrashes"), 12, y + 10, 0xFFFFFF);
+		drawString(this.textRenderer, I18n.translate("legacy.vanillafix.config.betterCrashes"), 12, y + 10, 0xFFFFFF);
 		
 		if (mouseY >= y && mouseY < (y + 30)) {
                         try {
@@ -155,7 +153,7 @@ public class ConfigScreen extends Screen {
 		}
 		
 		y += 30;
-		drawWithShadow(this.textRenderer, I18n.translate("legacy.vanillafix.config.fasterDimensionChange"), 12, y + 10, 0xFFFFFF);
+		drawString(this.textRenderer, I18n.translate("legacy.vanillafix.config.fasterDimensionChange"), 12, y + 10, 0xFFFFFF);
 		
 		if (mouseY >= y && mouseY < (y + 30)) {
                         try {
@@ -165,7 +163,7 @@ public class ConfigScreen extends Screen {
 		}
 		
 		y += 30;
-		drawWithShadow(this.textRenderer, I18n.translate("legacy.vanillafix.config.allowguisinnetherportals"), 12, y + 10, 0xFFFFFF);
+		drawString(this.textRenderer, I18n.translate("legacy.vanillafix.config.allowguisinnetherportals"), 12, y + 10, 0xFFFFFF);
 		
 		if (mouseY >= y && mouseY < (y + 30)) {
                         try {
@@ -175,7 +173,7 @@ public class ConfigScreen extends Screen {
 		}
 		
 		y += 30;
-		drawWithShadow(this.textRenderer, I18n.translate("legacy.vanillafix.config.disableinitalchunkload"), 12, y + 10, 0xFFFFFF);
+		drawString(this.textRenderer, I18n.translate("legacy.vanillafix.config.disableinitalchunkload"), 12, y + 10, 0xFFFFFF);
 		
 		if (mouseY >= y && mouseY < (y + 30)) {
                         try {

@@ -21,10 +21,10 @@ public class GlUtil {
 
         // Reset polygon offset
         GlStateManager.polygonOffset(0.0F, 0.0F);
-        GlStateManager.disablePolyOffset();
+        GlStateManager.disablePolygonOffset();
 
         // Reset color logic
-        GlStateManager.disableColorLogic();
+        GlStateManager.disableColorLogicOp();
         GlStateManager.logicOp(5387);
         // Disable lightmap
         GlStateManager.activeTexture(GL13.GL_TEXTURE1);

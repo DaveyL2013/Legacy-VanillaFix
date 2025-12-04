@@ -9,7 +9,6 @@ import net.fabricmc.loader.api.VersionParsingException;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-import piper74.legacy.vanillafix.LegacyVanillaFix;
 
 public class CrashesMixinPlugin implements IMixinConfigPlugin {
 

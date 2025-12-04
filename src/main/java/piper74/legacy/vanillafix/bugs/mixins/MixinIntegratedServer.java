@@ -17,7 +17,7 @@ public abstract class MixinIntegratedServer {
      */
 
 	@SuppressWarnings("deprecated")
-    @Redirect(method = "stopRunning", at = @At(value = "INVOKE", target = "Lcom/google/common/util/concurrent/Futures;getUnchecked(Ljava/util/concurrent/Future;)Ljava/lang/Object;", ordinal = 0, remap = false))
+    @Redirect(method = "stop", at = @At(value = "INVOKE", target = "Lcom/google/common/util/concurrent/Futures;getUnchecked(Ljava/util/concurrent/Future;)Ljava/lang/Object;", ordinal = 0, remap = false))
     private <V> V getUnchecked(Future<V> future) {
         return null;
     }

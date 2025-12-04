@@ -1,7 +1,7 @@
 package piper74.legacy.vanillafix.stacktrace.mixin;
 
 import net.minecraft.util.crash.CrashReport;
-import net.minecraft.util.crash.CrashReportSection;
+import net.minecraft.util.crash.CrashReportCategory;
 import piper74.legacy.vanillafix.util.PatchedCrashReport;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Final;
@@ -28,24 +28,24 @@ public abstract class MixinCrashReport implements PatchedCrashReport {
 	@Shadow private StackTraceElement[] stackTrace;
     @Shadow
     @Final
-    private Throwable cause;
+    private Throwable exception;
 	
     @Shadow
     @Final
-    private CrashReportSection systemDetailsSection;
+    private CrashReportCategory systemDetails;
 	
     @Shadow
     @Final
-    private List<CrashReportSection> otherSections;
+    private List<CrashReportCategory> details;
 	
 	@Shadow
-    private static String generateWittyComment() {
+    private static String getWittyComment() {
         return null;
     }
 	
     @Shadow
     @Final
-    private String message;
+    private String description;
 	
 	private Set<ModMetadata> suspectedMods = null;
 	
@@ -66,9 +66,9 @@ public abstract class MixinCrashReport implements PatchedCrashReport {
      */
     @Inject(method = "fillSystemDetails", at = @At("TAIL"))
     private void afterFillSystemDetails(CallbackInfo ci) {
-        systemDetailsSection.add("Suspected Mods", () -> {
+        systemDetails.add("Suspected Mods", () -> {
             try {
-                suspectedMods = ModIdentifier.identifyFromStacktrace(cause);
+                suspectedMods = ModIdentifier.identifyFromStacktrace(exception);
 
                 String modListString = "Unknown";
                 List<String> modNames = new ArrayList<>();
@@ -91,16 +91,16 @@ public abstract class MixinCrashReport implements PatchedCrashReport {
 	 * @author Runemoro
      */
     @Overwrite
-    public String asString() {
+    public String build() {
         StringBuilder builder = new StringBuilder();
 
         builder.append("---- Minecraft Crash Report ----\n")
-                        .append("// ").append(generateWittyComment())
+                        .append("// ").append(getWittyComment())
                         .append("\n\n")
                         .append("Time: ").append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z").format(new Date())).append("\n")
-                        .append("Description: ").append(message)
+                        .append("Description: ").append(description)
                         .append("\n\n")
-                        .append(stacktraceToString(cause)
+                        .append(stacktraceToString(exception)
                                         .replace("\t", "    ")) // Vanilla's getCauseStackTraceOrString doesn't print causes and suppressed exceptions
                         .append("\n\nA detailed walkthrough of the error, its code path and all known details is as follows:\n");
 
@@ -109,7 +109,7 @@ public abstract class MixinCrashReport implements PatchedCrashReport {
         }
 
         builder.append("\n\n");
-        addStackTrace(builder);
+        addDetails(builder);
         return builder.toString().replace("\t", "    ");
     }
 	
@@ -118,13 +118,13 @@ public abstract class MixinCrashReport implements PatchedCrashReport {
 	 * @author Runemoro
      */
     @Overwrite
-    public void addStackTrace(StringBuilder builder) {
-        for (CrashReportSection section : otherSections) {
-            section.addStackTrace(builder);
+    public void addDetails(StringBuilder builder) {
+        for (CrashReportCategory section : details) {
+            section.addDetails(builder);
             builder.append("\n");
         }
 
-        systemDetailsSection.addStackTrace(builder);
+        systemDetails.addDetails(builder);
     }
 
 	

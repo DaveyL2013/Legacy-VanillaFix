@@ -8,12 +8,11 @@
   "MixinMinecraftServer"
   ],
   "client": [
-    "ClientPlayerEntityMixin",
+    "LocalClientPlayerEntityMixin",
     "ClientPlayNetworkHandlerMixin",
-	"MixinIntegratedServer",
 	"GameRendererMixin",
     "F11FixMixin",
-	"PlayerEntityRendererMixin",
+	"PlayerRendererMixin",
     "SkullBlockEntityRendererMixin"
   ],
   "injectors": {

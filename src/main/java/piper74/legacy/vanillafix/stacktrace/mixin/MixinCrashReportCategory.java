@@ -6,10 +6,10 @@
 
 package piper74.legacy.vanillafix.stacktrace.mixin;
 
-import net.minecraft.util.crash.CrashReportSection;
+import net.minecraft.util.crash.CrashReportCategory;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(value = CrashReportSection.class)
-public abstract class MixinCrashReportSection {
+@Mixin(value = CrashReportCategory.class)
+public abstract class MixinCrashReportCategory {
 // TODO: Add vanillafix code here
 }

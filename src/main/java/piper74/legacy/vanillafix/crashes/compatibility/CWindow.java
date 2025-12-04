@@ -8,7 +8,7 @@ package piper74.legacy.vanillafix.crashes.compatibility;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.MathHelper;
 
 @Environment(value=EnvType.CLIENT)
@@ -19,20 +19,16 @@ public class CWindow {
     private int height;
     private int scaleFactor;
 
-    public CWindow(MinecraftClient minecraftClient, int i, int j) {
+    public CWindow(Minecraft minecraftClient, int i, int j) {
         this.width = i;
         this.height = j;
         this.scaleFactor = 1;
-        boolean bl = minecraftClient.hasReducedDebugInfo();
         int n = minecraftClient.options.guiScale;
         if (n == 0) {
             n = 1000;
         }
         while (this.scaleFactor < n && this.width / (this.scaleFactor + 1) >= 320 && this.height / (this.scaleFactor + 1) >= 240) {
             ++this.scaleFactor;
-        }
-        if (bl && this.scaleFactor % 2 != 0 && this.scaleFactor != 1) {
-            --this.scaleFactor;
         }
         this.scaledWidth = (double)this.width / (double)this.scaleFactor;
         this.scaledHeight = (double)this.height / (double)this.scaleFactor;

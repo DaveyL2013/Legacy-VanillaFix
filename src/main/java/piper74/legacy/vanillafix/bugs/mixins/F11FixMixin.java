@@ -20,7 +20,7 @@
 package piper74.legacy.vanillafix.bugs.mixins;
 
 import net.minecraft.client.options.GameOptions;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * This Mixin fixes a bug in Keyboard that prevents F11 changes from being saved.
  * See: https://bugs.mojang.com/browse/MC-175431
  */
-@Mixin(MinecraftClient.class)
+@Mixin(Minecraft.class)
 public class F11FixMixin {
 
 	@Shadow

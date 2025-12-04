@@ -12,8 +12,8 @@ import java.nio.file.Path;
 public class LegacyVanillaFixConfig {
 		public static final LegacyVanillaFixConfig DEFAULT = new LegacyVanillaFixConfig();
 	
-	public boolean betterCrashes = true;
-    public boolean catchInitCrashes = true;
+	public boolean betterCrashes = false;
+    public boolean catchInitCrashes = false;
 	public boolean fasterDimensionChange = true;
 	public boolean allowGUIsInNetherPortals = true;
 	//public String hasteUrl = "https://hastebin.com";

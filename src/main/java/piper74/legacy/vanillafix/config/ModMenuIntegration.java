@@ -1,23 +1,11 @@
 package piper74.legacy.vanillafix.config;
 
-import io.github.prospector.modmenu.api.ModMenuApi;
-import piper74.legacy.vanillafix.LegacyVanillaFix;
-import net.minecraft.client.gui.screen.Screen;
-
-// Note:
-// The way ModMenuApi was implemented it messes with
-// IntelliJ's Intellisense, just ignore it
-
-import java.util.function.Function;
+import com.terraformersmc.modmenu.api.ConfigScreenFactory;
+import com.terraformersmc.modmenu.api.ModMenuApi;
 
 public class ModMenuIntegration implements ModMenuApi {
     @Override
-    public Function<Screen, ? extends Screen> getConfigScreenFactory() {
+    public ConfigScreenFactory<?> getModConfigScreenFactory() {
         return ConfigScreen::new;
-    }
-
-    @Override
-    public String getModId() {
-        return LegacyVanillaFix.MOD_ID;
     }
 }

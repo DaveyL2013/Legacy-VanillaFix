@@ -14,7 +14,6 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.util.crash.CrashReport;
 import org.apache.commons.lang3.StringUtils;
-import piper74.legacy.vanillafix.LegacyVanillaFix;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -50,7 +49,7 @@ public abstract class GuiProblemScreen extends Screen{
             if(hasteLink == null){
                 try {
                     //hasteLink = CrashReportUpload.uploadToHastebin("https://www.toptal.com/developers/hastebin", "mccrash", report.asString());
-                    hasteLink = CrashReportUpload.uploadToGithubGists(report.asString());
+                    hasteLink = CrashReportUpload.uploadToGithubGists(report.toString());
                 } catch (IOException e) {
 					button.message = I18n.translate("legacy.vanillafix.gui.failed");
                     button.active = false;

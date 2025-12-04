@@ -2,7 +2,7 @@ package piper74.legacy.vanillafix.crashes.mixins.client;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.render.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;

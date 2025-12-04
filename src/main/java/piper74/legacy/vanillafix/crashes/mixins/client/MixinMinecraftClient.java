@@ -10,35 +10,35 @@ import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.MouseInput;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gl.Framebuffer;
-import net.minecraft.client.gui.hud.InGameHud;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.MouseInput;
+import net.minecraft.client.render.TextRenderer;
+import net.minecraft.client.gui.GameGui;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.network.handler.ClientPlayNetworkHandler;
 import net.minecraft.client.options.GameOptions;
-import net.minecraft.client.render.ClientTickTracker;
+import net.minecraft.client.TickTimer;
 import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.client.resource.ResourcePackLoader;
+import net.minecraft.client.render.world.WorldRenderer;
+import net.minecraft.client.resource.pack.ResourcePacks;
 import net.minecraft.client.resource.language.LanguageManager;
-import net.minecraft.client.sound.SoundManager;
-import net.minecraft.client.texture.TextureManager;
+import net.minecraft.client.sound.system.SoundManager;
+import net.minecraft.client.render.texture.TextureManager;
 import piper74.legacy.vanillafix.crashes.compatibility.CWindow;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.resource.DefaultResourcePack;
-import net.minecraft.resource.ReloadableResourceManager;
-import net.minecraft.resource.ReloadableResourceManagerImpl;
-import net.minecraft.resource.ResourcePack;
+import net.minecraft.client.resource.pack.BuiltInResourcePack;
+import net.minecraft.client.resource.manager.ReloadableResourceManager;
+import net.minecraft.client.resource.manager.SimpleReloadableResourceManager;
+import net.minecraft.client.resource.pack.ResourcePack;
 import net.minecraft.text.LiteralText;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.MetadataSerializer;
-import net.minecraft.util.ThreadExecutor;
+import net.minecraft.resource.Identifier;
+import net.minecraft.client.resource.metadata.ResourceMetadataSerializerRegistry;
+import net.minecraft.util.BlockableEventLoop;
 import net.minecraft.util.crash.CrashException;
 import net.minecraft.util.crash.CrashReport;
-import net.minecraft.util.snooper.Snoopable;
+import net.minecraft.snooper.SnooperPopulator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.LWJGLException;
@@ -57,8 +57,8 @@ import java.util.List;
  * @author Runemoro
  */
 @Environment(EnvType.CLIENT)
-@Mixin(MinecraftClient.class)
-public abstract class MixinMinecraftClient implements ThreadExecutor, Snoopable {
+@Mixin(Minecraft.class)
+public abstract class MixinMinecraftClient implements BlockableEventLoop, SnooperPopulator {
 	
 	LegacyVanillaFixConfig config = LegacyVanillaFix.getConfig();
 
@@ -71,18 +71,18 @@ public abstract class MixinMinecraftClient implements ThreadExecutor, Snoopable 
 	@Shadow
 	private CrashReport crashReport;
 	@Shadow
-	private void initializeGame() throws LWJGLException, IOException {}
+	private void init() throws LWJGLException, IOException {}
 	@Shadow
-	public static byte[] memoryReservedForCrash;
+	public static byte[] MEMORY_RESERVED_FOR_CRASH;
 	
 	@Shadow
-	public abstract CrashReport addSystemDetailsToCrashReport(CrashReport crashReport);
+	public abstract CrashReport populateCrashReport(CrashReport crashReport);
 	
 	@Shadow
 	public abstract void stop();
 	
 	@Shadow
-	private void runGameLoop() {}
+	private void runGame() {}
 	
 	@Shadow
 	private boolean crashed;
@@ -100,7 +100,7 @@ public abstract class MixinMinecraftClient implements ThreadExecutor, Snoopable 
 	private CrashReport crashReport2;
 	
 	@Shadow
-	public InGameHud inGameHud;
+	public GameGui gui;
 	
 	@Shadow
 	private long f3CTime;
@@ -109,10 +109,10 @@ public abstract class MixinMinecraftClient implements ThreadExecutor, Snoopable 
 	public abstract ClientPlayNetworkHandler getNetworkHandler();
 
 	@Shadow
-	public void connect(ClientWorld world) {}
+	public void setWorld(ClientWorld world) {}
 
 	@Shadow public boolean focused;
-	@Shadow private boolean glErrors;
+	@Shadow private boolean /*glErrors*/ f_2765940;
 	private static int clientCrashCount = 0;
     private static int serverCrashCount = 0;
 
@@ -120,7 +120,7 @@ public abstract class MixinMinecraftClient implements ThreadExecutor, Snoopable 
 	private ReloadableResourceManager resourceManager;
 
 	@Shadow
-	private ResourcePackLoader loader;
+	private ResourcePacks resourcePacks;
 
 	@Shadow
 	private LanguageManager languageManager;
@@ -128,17 +128,17 @@ public abstract class MixinMinecraftClient implements ThreadExecutor, Snoopable 
 	@Final
 	@Mutable
 	@Shadow
-	private MetadataSerializer metadataSerializer = new MetadataSerializer();
+	private ResourceMetadataSerializerRegistry resourceMetadataSerializerRegistry = new ResourceMetadataSerializerRegistry();
 
 	@Shadow
-	public void stitchTextures() {}
+	public void reloadResources() {}
 
 	@Shadow
 	public TextRenderer textRenderer;
 	@Shadow
 	public TextRenderer shadowTextRenderer;
 	@Shadow
-	public Screen currentScreen;
+	public Screen screen;
 	@Shadow
 	private TextureManager textureManager;
 	@Shadow
@@ -151,55 +151,55 @@ public abstract class MixinMinecraftClient implements ThreadExecutor, Snoopable 
 	public int height;
 
 	@Shadow
-	private void setDefaultIcon() {}
+	private void initIcon() {}
 
 	@Shadow
-	private void setDisplayBounds() throws LWJGLException {}
+	private void initDisplayMode() throws LWJGLException {}
 
 	@Shadow
-	private void setPixelFormat() throws LWJGLException {}
+	private void initDisplay() throws LWJGLException {}
 
 	@Mutable
 	@Final
 	@Shadow
-	private DefaultResourcePack defaultResourcePack;
+	private BuiltInResourcePack defaultResourcePack;
 
-	@Shadow @Final private List<ResourcePack> resourcePacks;
+	@Shadow @Final private List<ResourcePack> defaultResourcePacks;
 
 	@Shadow
-	private Framebuffer fbo;
+	private RenderTarget renderTarget;
 	@Shadow public MouseInput mouse;
 
 	@Shadow public abstract void updateDisplay();
 
-	@Shadow protected abstract void setGlErrorMessage(String message);
+	@Shadow protected abstract void logGlError(String message);
 
 	@Shadow private int attackCooldown;
 
 	@Mutable
 	@Final
 	@Shadow
-	private File resourcePackDir;
+	private File resourcePacksDir;
 
 	@Mutable
 	@Final
 	@Shadow
-	public File runDirectory;
+	public File runDir;
 
 	@Shadow
-	private void initializeTimerHackThread() {}
+	private void initTimerHackThread() {}
 
 	@Shadow
 	public GameRenderer gameRenderer;
 
 	@Shadow
-	private void registerMetadataSerializers() {}
+	private void initResourceMetadataSerializers() {}
 
 	@Shadow
 	public WorldRenderer worldRenderer;
 
 	@Shadow
-	private ClientTickTracker tricker = new ClientTickTracker(20.0f);
+	private TickTimer timer = new TickTimer(20.0f);
 
 	@Shadow public boolean skipGameRender;
 
@@ -214,10 +214,10 @@ public abstract class MixinMinecraftClient implements ThreadExecutor, Snoopable 
 
       //CrashReport crashReport2;
       try {
-         this.initializeGame();
+         this.init();
       } catch (Throwable var11) {
-         crashReport2 = CrashReport.create(var11, "Initializing game");
-         crashReport2.addElement("Initialization");
+         crashReport2 = CrashReport.of(var11, "Initializing game");
+         crashReport2.addCategory("Initialization");
          //this.printCrashReport(addSystemDetailsToCrashReport(crashReport2));
          //return;
 		 //this.stop();
@@ -225,7 +225,7 @@ public abstract class MixinMinecraftClient implements ThreadExecutor, Snoopable 
 			  displayInitErrorScreen(crashReport2);
 		  } else
 		  {
-			  this.printCrashReport(addSystemDetailsToCrashReport(crashReport2));
+			  this.printCrashReport(populateCrashReport(crashReport2));
 			  this.stop();
 		  }
 		  return;
@@ -237,10 +237,10 @@ public abstract class MixinMinecraftClient implements ThreadExecutor, Snoopable 
 	  while(running) {
 			  if (!crashed || crashReport == null) {
 				  try {
-					  runGameLoop();
+					  runGame();
 				  } catch (CrashException e) {
                      clientCrashCount++;
-					 addSystemDetailsToCrashReport(e.getReport());
+					 populateCrashReport(e.getReport());
 					 addInfoToCrash(e.getReport());
 					 //if (config.betterCrashes)
 					 resetGameState();
@@ -256,7 +256,7 @@ public abstract class MixinMinecraftClient implements ThreadExecutor, Snoopable 
 				  } catch (Throwable e) {
                      clientCrashCount++;
 					 CrashReport report = new CrashReport("Unexpected error", e);
-					 addSystemDetailsToCrashReport(report);
+					 populateCrashReport(report);
 					 addInfoToCrash(report);
 					 //if (config.betterCrashes)
 					 resetGameState();
@@ -286,8 +286,8 @@ public abstract class MixinMinecraftClient implements ThreadExecutor, Snoopable 
 	  }
 			 
     private static void addInfoToCrash(CrashReport report) {
-        report.getSystemDetailsSection().add("Client Crashes Since Restart", () -> String.valueOf(clientCrashCount));
-        report.getSystemDetailsSection().add("Integrated Server Crashes Since Restart", () -> String.valueOf(serverCrashCount));
+        report.getSystemDetails().add("Client Crashes Since Restart", () -> String.valueOf(clientCrashCount));
+        report.getSystemDetails().add("Integrated Server Crashes Since Restart", () -> String.valueOf(serverCrashCount));
     }			 
 	
 	 /**
@@ -298,20 +298,20 @@ public abstract class MixinMinecraftClient implements ThreadExecutor, Snoopable 
             // Free up memory such that this works properly in case of an OutOfMemoryError
             int originalMemoryReserveSize = -1;
             try { // In case another mod actually deletes the memoryReservedForCrash field
-                if (memoryReservedForCrash != null) {
-                    originalMemoryReserveSize = memoryReservedForCrash.length;
-                    memoryReservedForCrash = new byte[0];
+                if (MEMORY_RESERVED_FOR_CRASH != null) {
+                    originalMemoryReserveSize = MEMORY_RESERVED_FOR_CRASH.length;
+                    MEMORY_RESERVED_FOR_CRASH = new byte[0];
                 }
             } catch (Throwable ignored) {}
 
             StateManager.resetStates();
 
 			if (getNetworkHandler() != null) {
-			getNetworkHandler().getClientConnection().disconnect(new LiteralText(String.format("[%s] Client crashed", "Legacy VanillaFix")));
+			getNetworkHandler().getConnection().disconnect(new LiteralText(String.format("[%s] Client crashed", "Legacy VanillaFix")));
 			}
 
          this.world.disconnect();
-         this.connect((ClientWorld)null);
+         this.setWorld((ClientWorld)null);
 			
             //field_152351_aB.clear(); // TODO: Figure out why this isn't necessary for vanilla disconnect
 			
@@ -319,7 +319,7 @@ public abstract class MixinMinecraftClient implements ThreadExecutor, Snoopable 
 
             if (originalMemoryReserveSize != -1) {
                 try {
-                    memoryReservedForCrash = new byte[originalMemoryReserveSize];
+                    MEMORY_RESERVED_FOR_CRASH = new byte[originalMemoryReserveSize];
                 } catch (Throwable ignored) {}
             }
             System.gc();
@@ -363,7 +363,7 @@ public abstract class MixinMinecraftClient implements ThreadExecutor, Snoopable 
             // Vanilla does this when switching to main menu but not our custom crash screen
             // nor the out of memory screen (see https://bugs.mojang.com/browse/MC-128953)
             options.debugEnabled = false;
-			inGameHud.getChatHud().clear();
+			gui.getChat().clear();
 
 
             // Display the crash screen
@@ -381,39 +381,38 @@ public abstract class MixinMinecraftClient implements ThreadExecutor, Snoopable 
 	{
 		openScreen(screen);
 		this.focused = true;
-		while (running && currentScreen != null && !(currentScreen instanceof TitleScreen)) {
+		while (running && screen != null && !(screen instanceof TitleScreen)) {
 
 			// Restore compatibility with Minecraft 1.8
 			// No function here needs the Window class as an argument,
 			// so we can work around the crash in 1.8 by
 			// implementing our own custom Window class
-			CWindow window = new CWindow(MinecraftClient.getInstance(), width, height);
-			int i = window.getScaleFactor();
+			CWindow window = new CWindow(Minecraft.getInstance(), width, height);
 
 			if(Display.isCreated() && Display.isCloseRequested()) System.exit(0);
 
 			textureManager.tick();
 
 			attackCooldown = 10000;
-			currentScreen.handleInput();
+			screen.handleInputs();
 			//currentScreen.getClass().getCanonicalName();
-			currentScreen.tick();
+			screen.tick();
 			//currentScreen.getClass().getCanonicalName();
 
 
 			soundManager.tick();
 
-			mouse.updateMouse();
+			mouse.tick();
 
 			//currentScreen.
 
 			GlStateManager.pushMatrix();
 			GlStateManager.clear(16640);
-			fbo.bind(true);
+			renderTarget.bindWrite(true);
 			GlStateManager.enableTexture(); //OG ONE
 
 
-			GlStateManager.viewPort(0, 0, width, height);
+			GlStateManager.viewport(0, 0, width, height);
 
 			GlStateManager.clear(256);
 			GlStateManager.matrixMode(5889);
@@ -431,20 +430,20 @@ public abstract class MixinMinecraftClient implements ThreadExecutor, Snoopable 
 
 			//GlStateManager.enableBlend();
 
-			currentScreen.render(
+			screen.render(
 					(int) (Mouse.getX() * windowWidth / width),
 					(int) (windowHeight - Mouse.getY() * windowHeight / height - 1),
-					tricker.tickDelta
+					timer.tickDelta
 			);
 
 			//GlStateManager.disableBlend();
 
-			fbo.endWrite();
+			renderTarget.unbindWrite();
 			GlStateManager.popMatrix();
 
 			GlStateManager.pushMatrix();
 			//fbo.draw(window.getWidth() * i, window.getHeight() * i);
-			fbo.draw(width, height);
+			renderTarget.draw(width, height);
 			GlStateManager.popMatrix();
 
 			//LegacyVanillaFix.LOGGER.info("RunGUILOOP FINISHED!");
@@ -453,56 +452,56 @@ public abstract class MixinMinecraftClient implements ThreadExecutor, Snoopable 
 			this.updateDisplay();
 			Thread.yield();
 			Display.sync(60);
-			this.setGlErrorMessage("Legacy VanillaFix GUI Loop");
+			this.logGlError("Legacy VanillaFix GUI Loop");
 		}
 	}
 
 	public void displayInitErrorScreen(CrashReport crashReport) {
-		//MinecraftClient.getInstance().
-		//crashReport = CrashReport.create(var11, "Initializing game");
+		//Minecraft.getInstance().
+		//crashReport = CrashReport.of(var11, "Initializing game");
 		//crashReport.addElement("Initialization");
 
 		CrashUtils.outputReport(crashReport2);
 		try {
-			options = new GameOptions(MinecraftClient.getInstance(), runDirectory);
-			resourcePacks.add(defaultResourcePack);
-			initializeTimerHackThread();
+			options = new GameOptions(Minecraft.getInstance(), runDir);
+			defaultResourcePacks.add(defaultResourcePack);
+			initTimerHackThread();
 
-			setDefaultIcon();
-			setDisplayBounds();
-			setPixelFormat();
-			GLX.createContext();
+			initIcon();
+			initDisplayMode();
+			initDisplay();
+			GLX.init();
 
-			this.fbo = new Framebuffer(width, height, true);
-			this.fbo.setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+			this.renderTarget = new RenderTarget(width, height, true);
+			this.renderTarget.setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-			registerMetadataSerializers();
-			this.loader = new ResourcePackLoader(this.resourcePackDir, new File(runDirectory, "server-resource-packs"), defaultResourcePack, metadataSerializer, options);
-			this.resourceManager = new ReloadableResourceManagerImpl(this.metadataSerializer);
+			initResourceMetadataSerializers();
+			this.resourcePacks = new ResourcePacks(this.resourcePacksDir, new File(runDir, "server-resource-packs"), defaultResourcePack, resourceMetadataSerializerRegistry, options);
+			this.resourceManager = new SimpleReloadableResourceManager(this.resourceMetadataSerializerRegistry);
 
-			this.languageManager = new LanguageManager(this.metadataSerializer, options.language);
-			this.resourceManager.registerListener(languageManager);
+			this.languageManager = new LanguageManager(this.resourceMetadataSerializerRegistry, options.language);
+			this.resourceManager.addListener(languageManager);
 
 			this.textureManager = new TextureManager(this.resourceManager);
-			this.resourceManager.registerListener(this.textureManager);
+			this.resourceManager.addListener(this.textureManager);
 
-			stitchTextures();
+			reloadResources();
 
 			this.textRenderer = new TextRenderer(this.options, new Identifier("textures/font/ascii.png"), this.textureManager, false);
 			this.shadowTextRenderer = new TextRenderer(options, new Identifier("textures/font/ascii_sga.png"), this.textureManager, false);
-			this.resourceManager.registerListener(this.textRenderer);
-			this.resourceManager.registerListener(this.shadowTextRenderer);
+			this.resourceManager.addListener(this.textRenderer);
+			this.resourceManager.addListener(this.shadowTextRenderer);
 
 			soundManager = new SoundManager(resourceManager, options);
-			resourceManager.registerListener(soundManager);
+			resourceManager.addListener(soundManager);
 
 			// DO NOT INITIALISE THIS, CAUSES FURTHER CRASHING PROBLEMS
 			/*
-			gameRenderer = new GameRenderer(MinecraftClient.getInstance(), resourceManager);
-			resourceManager.registerListener(gameRenderer);
+			gameRenderer = new GameRenderer(Minecraft.getInstance(), resourceManager);
+			resourceManager.addListener(gameRenderer);
 
-			this.worldRenderer = new WorldRenderer(MinecraftClient.getInstance());
-			this.resourceManager.registerListener(this.worldRenderer);
+			this.worldRenderer = new WorldRenderer(Minecraft.getInstance());
+			this.resourceManager.addListener(this.worldRenderer);
 			*/
 
 			mouse = new MouseInput();
@@ -513,7 +512,7 @@ public abstract class MixinMinecraftClient implements ThreadExecutor, Snoopable 
 
 			runGuiLoop(new GuiInitErrorScreen(crashReport2));
 		} catch (Throwable t) {
-			CrashReport additionalReport = CrashReport.create(t, "Displaying init error screen");
+			CrashReport additionalReport = CrashReport.of(t, "Displaying init error screen");
 			LOGGER.error("An uncaught exception occured while displaying the init error screen, making normal report instead", t);
 			printCrashReport(additionalReport);
 			System.exit(additionalReport.getFile() != null ? -1 : -2);

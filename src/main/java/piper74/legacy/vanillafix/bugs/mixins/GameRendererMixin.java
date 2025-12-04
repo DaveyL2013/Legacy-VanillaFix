@@ -2,10 +2,10 @@ package piper74.legacy.vanillafix.bugs.mixins;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.world.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,7 +21,7 @@ import piper74.legacy.vanillafix.config.LegacyVanillaFixConfig;
 @Unique
 public class GameRendererMixin {
 
-	@Shadow private MinecraftClient client;
+	@Shadow private Minecraft minecraft;
 
 	LegacyVanillaFixConfig config = LegacyVanillaFix.getConfig();
 
@@ -29,8 +29,8 @@ public class GameRendererMixin {
 	 * @reason Fixes camera getting stuck on transparent blocks
 	 * @author piper74
 	 */
-	@Redirect(method = "transformCamera(F)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;rayTrace(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;)Lnet/minecraft/util/hit/BlockHitResult;"), expect = 0 )
-	private BlockHitResult rayTrace(ClientWorld world, Vec3d vec3d, Vec3d vec3d2) {
+	@Redirect(method = "transformCamera(F)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;rayTrace(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;)Lnet/minecraft/world/HitResult;"), expect = 0 )
+	private HitResult rayTrace(ClientWorld world, Vec3d vec3d, Vec3d vec3d2) {
 			if (config.F5Fix) {
 				return world.rayTrace(vec3d, vec3d2, false, true, false);
 			}
@@ -40,8 +40,8 @@ public class GameRendererMixin {
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;getBrightness(Lnet/minecraft/util/math/BlockPos;)F"))
 	private float getBrightness(ClientWorld world, BlockPos pos) {
 			if (config.skyDarknessFix) {
-				return client.player.getBrightnessAtEyes(1);
+				return minecraft.player.getBrightness(1);
 			}
-		return world.getBrightness(new BlockPos(client.getCameraEntity()));
+		return world.getBrightness(new BlockPos(minecraft.getCamera()));
 	}
 }

@@ -33,7 +33,7 @@ public class GuiCrashScreen extends GuiProblemScreen {
         super.init();
 
         if (report != null) {
-            CrashReportNameWidth = this.textRenderer.getStringWidth(report.getFile().getName());
+            CrashReportNameWidth = this.textRenderer.getWidth(report.getFile().getName());
             CrashReportNameWidth2 = (this.width / 2) - (CrashReportNameWidth / 2);
         }
 
@@ -45,7 +45,7 @@ public class GuiCrashScreen extends GuiProblemScreen {
     protected void buttonClicked(ButtonWidget button) {
         super.buttonClicked(button);
         if (button.id == 0) {
-            this.client.openScreen(new TitleScreen());
+            this.minecraft.openScreen(new TitleScreen());
         }
     }
 
@@ -73,20 +73,20 @@ public class GuiCrashScreen extends GuiProblemScreen {
         int x = width / 2 - 155;
         int y = height / 4;
 
-        this.drawWithShadow(this.textRenderer, I18n.translate("legacy.vanillafix.crashscreen.summary"), x, y, textColor);
-        this.drawWithShadow(this.textRenderer, I18n.translate("legacy.vanillafix.crashscreen.paragraph1.line1"), x, y += 18, textColor);
+        this.drawString(this.textRenderer, I18n.translate("legacy.vanillafix.crashscreen.summary"), x, y, textColor);
+        this.drawString(this.textRenderer, I18n.translate("legacy.vanillafix.crashscreen.paragraph1.line1"), x, y += 18, textColor);
 
         this.drawCenteredString(this.textRenderer, getModListString(), width / 2, y += 11, 0xE0E000);
 
-        this.drawWithShadow(this.textRenderer, I18n.translate("legacy.vanillafix.crashscreen.paragraph2.line1"), x, y += 11, textColor);
+        this.drawString(this.textRenderer, I18n.translate("legacy.vanillafix.crashscreen.paragraph2.line1"), x, y += 11, textColor);
 
         this.drawCenteredString(this.textRenderer, report != null && report.getFile() != null ? "\u00A7n" + report.getFile().getName() : I18n.translate("legacy.vanillafix.crashscreen.reportSaveFailed"), width / 2, y += 11, 0x00FF00);
         CrashReportName_Height = y;
 
-        this.drawWithShadow(this.textRenderer, I18n.translate("legacy.vanillafix.crashscreen.paragraph3.line1"), x, y += 12, textColor);
-        this.drawWithShadow(this.textRenderer, I18n.translate("legacy.vanillafix.crashscreen.paragraph3.line2"), x, y += 9, textColor);
-        this.drawWithShadow(this.textRenderer, I18n.translate("legacy.vanillafix.crashscreen.paragraph3.line3"), x, y += 9, textColor);
-        this.drawWithShadow(this.textRenderer, I18n.translate("legacy.vanillafix.crashscreen.paragraph3.line4"), x, y += 9, textColor);
+        this.drawString(this.textRenderer, I18n.translate("legacy.vanillafix.crashscreen.paragraph3.line1"), x, y += 12, textColor);
+        this.drawString(this.textRenderer, I18n.translate("legacy.vanillafix.crashscreen.paragraph3.line2"), x, y += 9, textColor);
+        this.drawString(this.textRenderer, I18n.translate("legacy.vanillafix.crashscreen.paragraph3.line3"), x, y += 9, textColor);
+        this.drawString(this.textRenderer, I18n.translate("legacy.vanillafix.crashscreen.paragraph3.line4"), x, y += 9, textColor);
         super.render(mouseX, mouseY, tickDelta);
     }
 }
